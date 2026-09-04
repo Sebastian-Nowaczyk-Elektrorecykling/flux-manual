@@ -36,6 +36,10 @@ fi
 
 export GITHUB_TOKEN
 
+# Install longhorn prerequisites
+echo "==> Installing Longhorn prerequisites"
+sudo apt install open-iscsi util-linux -y
+
 # Get k3s without network bits
 echo "==> Installing k3s"
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh -
