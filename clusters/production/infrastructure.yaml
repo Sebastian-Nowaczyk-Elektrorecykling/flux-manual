@@ -81,3 +81,66 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-platform-auth
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/platform-auth
+  prune: true
+  wait: true
+  timeout: 5m
+
+  dependsOn:
+    - name: infra-cilium
+    - name: infra-keycloak
+
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-monitoring
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/monitoring
+  prune: true
+  wait: true
+  timeout: 10m
+
+  dependsOn:
+    - name: infra-longhorn
+    - name: infra-cilium
+    - name: infra-platform-auth
+
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-gateway
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/gateway
+  prune: true
+  wait: true
+  timeout: 5m
+
+  dependsOn:
+    - name: infra-cilium
+    - name: infra-keycloak
+    - name: infra-platform-auth
+    - name: infra-monitoring
+
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
