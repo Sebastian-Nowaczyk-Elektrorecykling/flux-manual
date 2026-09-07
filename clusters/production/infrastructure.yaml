@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infra-1-cilium
+  name: infra-cilium
   namespace: flux-system
 spec:
   interval: 10m
@@ -16,7 +16,24 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infra-2-longhorn
+  name: infra-kyverno
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/kyverno
+  prune: true
+  wait: true
+  timeout: 5m
+  dependsOn:
+    - name: infra-cilium
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-longhorn
   namespace: flux-system
 spec:
   interval: 10m
@@ -25,7 +42,7 @@ spec:
   wait: true
   timeout: 5m
   dependsOn:
-    - name: infra-1-cilium
+    - name: infra-cilium
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -33,7 +50,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infra-3-cnpg
+  name: infra-cnpg
   namespace: flux-system
 spec:
   interval: 10m
@@ -42,7 +59,7 @@ spec:
   wait: true
   timeout: 5m
   dependsOn:
-    - name: infra-2-longhorn
+    - name: infra-longhorn
   sourceRef:
     kind: GitRepository
     name: flux-system
