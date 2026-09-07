@@ -14,12 +14,56 @@ metadata:
   namespace: kube-system
 spec:
   interval: 30m
+
   chart:
     spec:
       chart: cilium
+      version: "1.20.1"
       sourceRef:
         kind: HelmRepository
         name: cilium
         namespace: flux-system
+
   values:
     kubeProxyReplacement: true
+
+    gatewayAPI:
+      enabled: true
+
+      # Good starting point before LB-IPAM/BGP is configured.
+      # Envoy listens on the node network directly.
+      hostNetwork:
+        enabled: true
+
+      useRemoteAddress: true
+
+    prometheus:
+      enabled: true
+
+    operator:
+      prometheus:
+        enabled: true
+
+    envoy:
+      prometheus:
+        enabled: true
+
+    hubble:
+      enabled: true
+
+      relay:
+        enabled: true
+
+      ui:
+        enabled: true
+
+      metrics:
+        enableOpenMetrics: true
+
+        enabled:
+          - dns:query;ignoreAAAA
+          - drop
+          - tcp
+          - flow
+          - icmp
+          - httpV2
