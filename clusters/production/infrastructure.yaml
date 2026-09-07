@@ -60,6 +60,7 @@ spec:
   timeout: 5m
   dependsOn:
     - name: infra-longhorn
+    - name: infra-kyverno
   sourceRef:
     kind: GitRepository
     name: flux-system
