@@ -30,13 +30,21 @@ spec:
     gatewayAPI:
       enabled: true
 
+      # Good starting point before LB-IPAM/BGP is configured.
+      # Envoy listens on the node network directly.
       hostNetwork:
         enabled: true
+
+      useRemoteAddress: true
 
     prometheus:
       enabled: true
 
     operator:
+      prometheus:
+        enabled: true
+
+    envoy:
       prometheus:
         enabled: true
 
@@ -51,6 +59,7 @@ spec:
 
       metrics:
         enableOpenMetrics: true
+
         enabled:
           - dns:query;ignoreAAAA
           - drop
