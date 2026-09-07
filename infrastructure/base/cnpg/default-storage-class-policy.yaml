@@ -1,0 +1,59 @@
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: default-cnpg-storage-class
+spec:
+  failurePolicy: Fail
+
+  evaluation:
+    admission:
+      enabled: true
+    mutateExisting:
+      enabled: false
+
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - postgresql.cnpg.io
+        apiVersions:
+          - v1
+        resources:
+          - clusters
+        operations:
+          - CREATE
+          - UPDATE
+
+  mutations:
+    # PGDATA
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: |
+          has(object.spec.storage) &&
+          !has(object.spec.storage.storageClass)
+          ?
+          [
+            JSONPatch{
+              op: "add",
+              path: "/spec/storage/storageClass",
+              value: "longhorn-cnpg"
+            }
+          ]
+          :
+          []
+
+    # Separate WAL volume, if the Cluster uses one
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: |
+          has(object.spec.walStorage) &&
+          !has(object.spec.walStorage.storageClass)
+          ?
+          [
+            JSONPatch{
+              op: "add",
+              path: "/spec/walStorage/storageClass",
+              value: "longhorn-cnpg"
+            }
+          ]
+          :
+          []
