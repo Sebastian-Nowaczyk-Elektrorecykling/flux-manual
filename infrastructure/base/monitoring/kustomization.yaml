@@ -3,3 +3,5 @@ kind: Kustomization
 
 resources:
   - prometheus-stack.yaml
+  - cilium-monitors.yaml
+  - routes.yaml
