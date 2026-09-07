@@ -42,7 +42,7 @@ sudo apt install open-iscsi util-linux -y
 
 # Get k3s without network bits
 echo "==> Installing k3s"
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy --disable-kube-proxy" sh -
 mkdir -p ~/.kube || true
 sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 sudo chown $(id -u):$(id -g) ~/.kube/config
