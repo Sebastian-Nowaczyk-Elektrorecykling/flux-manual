@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - longhorn.yaml
   - replicated-storage-class.yaml
+  - cnpg-storage-class.yaml
