@@ -22,7 +22,6 @@ spec:
   chart:
     spec:
       chart: cloudnative-pg
-      version: "0.x"
       sourceRef:
         kind: HelmRepository
         name: cnpg
