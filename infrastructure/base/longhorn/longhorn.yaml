@@ -22,7 +22,6 @@ spec:
   chart:
     spec:
       chart: longhorn
-      version: "1.x"
       sourceRef:
         kind: HelmRepository
         name: longhorn
