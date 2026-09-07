@@ -126,11 +126,11 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infra-gateway
+  name: infra-gateway-system
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./infrastructure/base/gateway
+  path: ./infrastructure/base/gateway-system
   prune: true
   wait: true
   timeout: 5m
@@ -141,6 +141,23 @@ spec:
     - name: infra-platform-auth
     - name: infra-monitoring
 
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-routes
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/routes
+  prune: true
+  wait: true
+  timeout: 5m
+  dependsOn:
+    - name: infra-gateway-system
   sourceRef:
     kind: GitRepository
     name: flux-system
