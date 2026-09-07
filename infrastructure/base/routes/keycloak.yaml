@@ -10,7 +10,7 @@ spec:
       sectionName: https
 
   hostnames:
-    - keycloak.internal
+    - auth.internal
 
   rules:
     - matches:
