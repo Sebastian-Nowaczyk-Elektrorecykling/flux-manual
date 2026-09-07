@@ -33,9 +33,6 @@ metadata:
   namespace: keycloak
 spec:
   interval: 10m
-  dependsOn:
-    - name: bitnami
-      kind: HelmRepository
   chart:
     spec:
       chart: keycloak
