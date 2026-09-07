@@ -1,1 +1,49 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  parentRefs:
+    - name: platform
+      namespace: gateway-system
+      sectionName: https
 
+  hostnames:
+    - longhorn.internal
+
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+      filters:
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+
+            backendRef:
+              name: platform-auth
+              namespace: platform-auth
+              port: 9000
+
+            http:
+              path: /authorize
+
+              allowedHeaders:
+                - Authorization
+                - Cookie
+                - X-Forwarded-For
+                - X-Forwarded-Host
+                - X-Forwarded-Proto
+
+              allowedResponseHeaders:
+                - X-Platform-Subject
+                - X-Platform-Username
+                - X-Platform-Email
+                - X-Platform-Groups
+
+      backendRefs:
+        - name: longhorn-frontend
+          port: 80
