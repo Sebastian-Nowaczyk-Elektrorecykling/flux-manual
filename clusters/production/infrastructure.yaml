@@ -8,7 +8,7 @@ spec:
   path: ./infrastructure/base/cilium
   prune: true
   wait: true
-  timeout: 5m
+  timeout: 10m
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -23,12 +23,30 @@ spec:
   path: ./infrastructure/base/kyverno
   prune: true
   wait: true
-  timeout: 5m
-  dependsOn:
-    - name: infra-cilium
+  timeout: 10m
   sourceRef:
     kind: GitRepository
     name: flux-system
+  dependsOn:
+  - name: infra-cilium
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-security
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/security
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+  - name: infra-cilium
+  - name: infra-kyverno
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -40,12 +58,12 @@ spec:
   path: ./infrastructure/base/longhorn
   prune: true
   wait: true
-  timeout: 5m
-  dependsOn:
-    - name: infra-cilium
+  timeout: 10m
   sourceRef:
     kind: GitRepository
     name: flux-system
+  dependsOn:
+  - name: infra-cilium
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -57,13 +75,13 @@ spec:
   path: ./infrastructure/base/cnpg
   prune: true
   wait: true
-  timeout: 5m
-  dependsOn:
-    - name: infra-longhorn
-    - name: infra-kyverno
+  timeout: 10m
   sourceRef:
     kind: GitRepository
     name: flux-system
+  dependsOn:
+  - name: infra-longhorn
+  - name: infra-kyverno
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -75,12 +93,119 @@ spec:
   path: ./infrastructure/base/keycloak
   prune: true
   wait: true
-  timeout: 5m
-  dependsOn:
-    - name: infra-cnpg
+  timeout: 10m
   sourceRef:
     kind: GitRepository
     name: flux-system
+  dependsOn:
+  - name: infra-cnpg
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-gateway-system
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/gateway-system
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+  - name: infra-cilium
+  - name: infra-security
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-keycloak-realm
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/keycloak-realm
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+  - name: infra-keycloak
+  force: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-login-routes
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/login-routes
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+  - name: infra-gateway-system
+  - name: infra-keycloak-realm
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-openfga-db
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/openfga-db
+  prune: false
+  wait: true
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+  - name: infra-cnpg
+  deletionPolicy: Orphan
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-openfga-migrate
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/openfga-migrate
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+  - name: infra-openfga-db
+  force: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-openfga
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/base/openfga
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+  - name: infra-openfga-migrate
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -92,15 +217,13 @@ spec:
   path: ./infrastructure/base/platform-auth
   prune: true
   wait: true
-  timeout: 5m
-
-  dependsOn:
-    - name: infra-cilium
-    - name: infra-keycloak
-
+  timeout: 10m
   sourceRef:
     kind: GitRepository
     name: flux-system
+  dependsOn:
+  - name: infra-openfga
+  - name: infra-login-routes
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -113,37 +236,12 @@ spec:
   prune: true
   wait: true
   timeout: 10m
-
-  dependsOn:
-    - name: infra-longhorn
-    - name: infra-cilium
-    - name: infra-platform-auth
-
   sourceRef:
     kind: GitRepository
     name: flux-system
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: infra-gateway-system
-  namespace: flux-system
-spec:
-  interval: 10m
-  path: ./infrastructure/base/gateway-system
-  prune: true
-  wait: true
-  timeout: 5m
-
   dependsOn:
-    - name: infra-cilium
-    - name: infra-keycloak
-    - name: infra-platform-auth
-    - name: infra-monitoring
-
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
+  - name: infra-longhorn
+  - name: infra-cilium
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -155,9 +253,12 @@ spec:
   path: ./infrastructure/base/routes
   prune: true
   wait: true
-  timeout: 5m
-  dependsOn:
-    - name: infra-gateway-system
+  timeout: 10m
   sourceRef:
     kind: GitRepository
     name: flux-system
+  dependsOn:
+  - name: infra-gateway-system
+  - name: infra-platform-auth
+  - name: infra-monitoring
+  - name: infra-longhorn
