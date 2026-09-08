@@ -23,11 +23,6 @@ spec:
           externalAuth:
             protocol: HTTP
 
-            backendRef:
-              name: platform-auth
-              namespace: platform-auth
-              port: 9000
-
             http:
               path: /authorize
 
